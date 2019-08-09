@@ -14,7 +14,7 @@ class LoginRoute extends StatelessWidget {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[LoginFormWidget(), FingerprintAuth()],
+          children: <Widget>[LoginFormWidget()],
         ),
       ),
     );
@@ -77,6 +77,11 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
               },
               child: Text('Submit'),
             ),
+          ),
+          Padding(
+              padding:
+              const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+              child: FingerprintAuth()
           ),
         ],
       ),
