@@ -155,7 +155,7 @@ class _FingerprintAuthState extends State<FingerprintAuth> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            content: Text("Authentication Successful!:"),
+            content: Text("Authentication Successful!"),
             actions: <Widget>[
               FlatButton(
                 child: Text("Close"),
