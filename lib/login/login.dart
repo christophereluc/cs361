@@ -146,26 +146,24 @@ class _FingerprintAuthState extends State<FingerprintAuth> {
     if (!mounted) return;
 
     setState(() {
-      _showDialog(authenticated);
+      if (authenticated) _showDialog();
     });
   }
 
-  void _showDialog(bool success) {
+  void _showDialog() {
     showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            content: Text(success
-                ? "Authentication Successful!"
-                : "Authentication Failed!"),
+            content: Text("Authentication Successful!:"),
             actions: <Widget>[
               FlatButton(
                 child: Text("Close"),
                 onPressed: () {
                   //Dismiss dialog
                   Navigator.of(context).pop();
-                  //If auth was successful, dismiss auth screen
-                  if (success) Navigator.of(context).pop();
+                  //dismiss auth screen
+                  Navigator.of(context).pop();
                 },
               )
             ],
