@@ -11,6 +11,7 @@ class NotificationsRoute extends StatelessWidget {
         child: RaisedButton(
           onPressed: () {
             // Navigate back to first route when tapped.
+            Navigator.pop(context);
           },
           child: Text('Go back!'),
         ),

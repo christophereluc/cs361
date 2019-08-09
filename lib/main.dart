@@ -3,7 +3,9 @@ import 'package:cs361/themes.dart';
 import 'package:cs361/login/login.dart';
 import 'package:cs361/notifications/notifications.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -56,3 +58,4 @@ class MyHomePage extends StatelessWidget {
     );
   }
 }
+
