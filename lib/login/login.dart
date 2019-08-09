@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 
+//Login Route class -- Defines page
 class LoginRoute extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -21,6 +22,7 @@ class LoginRoute extends StatelessWidget {
   }
 }
 
+//Form Widget -- Holds login state
 class LoginFormWidget extends StatefulWidget {
   LoginFormWidget({Key key}) : super(key: key);
 
@@ -28,6 +30,7 @@ class LoginFormWidget extends StatefulWidget {
   _LoginFormWidgetState createState() => _LoginFormWidgetState();
 }
 
+//Form state
 class _LoginFormWidgetState extends State<LoginFormWidget> {
   final _formKey = GlobalKey<FormState>();
 
@@ -40,7 +43,8 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
         children: <Widget>[
           Padding(
             padding:
-            const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+            const EdgeInsets.only(
+                left: 16.0, right: 16.0, top: 16.0, bottom: 8.0),
             child: TextFormField(
               decoration: InputDecoration(labelText: 'Username'),
               validator: (value) {
@@ -53,7 +57,8 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
           ),
           Padding(
             padding:
-            const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+            const EdgeInsets.only(
+                left: 16.0, right: 16.0, top: 8.0, bottom: 8.0),
             child: TextFormField(
               decoration: InputDecoration(labelText: 'Password'),
               validator: (value) {
@@ -66,7 +71,8 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
           ),
           Padding(
             padding:
-            const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+            const EdgeInsets.only(
+                left: 16.0, right: 16.0, top: 8.0, bottom: 8.0),
             child: RaisedButton(
               onPressed: () {
                 // Validate will return true if the form is valid, or false if
@@ -80,7 +86,8 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
           ),
           Padding(
               padding:
-              const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+              const EdgeInsets.only(
+                  left: 16.0, right: 16.0, top: 8.0, bottom: 16.0),
               child: FingerprintAuth()
           ),
         ],
@@ -89,6 +96,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
   }
 }
 
+//Special widget for holding fingerprint auth state
 class FingerprintAuth extends StatefulWidget {
   @override
   _FingerprintAuthState createState() => _FingerprintAuthState();
@@ -98,7 +106,6 @@ class _FingerprintAuthState extends State<FingerprintAuth> {
   final LocalAuthentication auth = LocalAuthentication();
   bool _canCheckBiometrics;
   List<BiometricType> _availableBiometrics;
-  String _authorized = 'Not Authorized';
 
   Future<void> _checkBiometrics() async {
     bool canCheckBiometrics;
@@ -139,9 +146,32 @@ class _FingerprintAuthState extends State<FingerprintAuth> {
     if (!mounted) return;
 
     setState(() {
-      _authorized = authenticated ? 'Authorized' : 'Not Authorized';
-      print(_authorized);
+      _showDialog(authenticated);
     });
+  }
+
+  void _showDialog(bool success) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Text(success
+                ? "Authentication Successful!"
+                : "Authentication Failed!"),
+            actions: <Widget>[
+              FlatButton(
+                child: Text("Close"),
+                onPressed: () {
+                  //Dismiss dialog
+                  Navigator.of(context).pop();
+                  //If auth was successful, dismiss auth screen
+                  if (success) Navigator.of(context).pop();
+                },
+              )
+            ],
+          );
+        }
+    );
   }
 
   @override
