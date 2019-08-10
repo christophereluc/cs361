@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:cs361/main.dart';
 
 class NotificationsRoute extends StatelessWidget {
   @override
@@ -86,7 +87,7 @@ class _NotificationFormWidgetState extends State<NotificationFormWidget> {
                 // Validate will return true if the form is valid, or false if
                 // the form is invalid.
                 if (_formKey.currentState.validate()) {
-                  // Process data.
+                  displayNotification();
                 }
               },
               child: Text('Submit'),
