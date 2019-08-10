@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:cs361/main.dart';
+import 'notification_helper.dart';
 
 class NotificationsRoute extends StatelessWidget {
   @override
@@ -27,9 +27,16 @@ class NotificationFormWidget extends StatefulWidget {
   _NotificationFormWidgetState createState() => _NotificationFormWidgetState();
 }
 
+class _FormData {
+  DateTime time = DateTime.now();
+  String message = '';
+}
+
 //Form state
 class _NotificationFormWidgetState extends State<NotificationFormWidget> {
   final _formKey = GlobalKey<FormState>();
+  final _formData = _FormData();
+
   DateTime dropdownValue = DateTime.now();
   final formatter = new DateFormat().add_yMd().add_Hm();
 
@@ -60,6 +67,7 @@ class _NotificationFormWidgetState extends State<NotificationFormWidget> {
                           showTitleActions: true, onConfirm: (date) {
                             setState(() {
                               dropdownValue = date;
+                              _formData.time = date;
                             });
                           });
                     },
@@ -75,8 +83,10 @@ class _NotificationFormWidgetState extends State<NotificationFormWidget> {
                 if (value.isEmpty) {
                   return 'Please enter text';
                 }
+
                 return null;
               },
+              onSaved: (value) => _formData.message = value,
             ),
           ),
           Padding(
@@ -87,7 +97,12 @@ class _NotificationFormWidgetState extends State<NotificationFormWidget> {
                 // Validate will return true if the form is valid, or false if
                 // the form is invalid.
                 if (_formKey.currentState.validate()) {
-                  displayNotification();
+                  //Save the state
+                  _formKey.currentState.save();
+                  //Then fire off notifications
+                  displayNotification(
+                      "Reminder!", _formData.message, _formData.time);
+                  _showDialog();
                 }
               },
               child: Text('Submit'),
@@ -95,6 +110,28 @@ class _NotificationFormWidgetState extends State<NotificationFormWidget> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showDialog() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Text("Notification Scheduled!"),
+            actions: <Widget>[
+              FlatButton(
+                child: Text("Close"),
+                onPressed: () {
+                  //Dismiss dialog
+                  Navigator.of(context).pop();
+                  //dismiss auth screen
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          );
+        }
     );
   }
 }
