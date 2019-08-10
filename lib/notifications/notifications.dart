@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:intl/intl.dart';
 
 class NotificationsRoute extends StatelessWidget {
   @override
@@ -27,7 +29,8 @@ class NotificationFormWidget extends StatefulWidget {
 //Form state
 class _NotificationFormWidgetState extends State<NotificationFormWidget> {
   final _formKey = GlobalKey<FormState>();
-  String dropdownValue = 'Sunday';
+  DateTime dropdownValue = DateTime.now();
+  final formatter = new DateFormat().add_yMd().add_Hm();
 
   @override
   Widget build(BuildContext context) {
@@ -36,42 +39,34 @@ class _NotificationFormWidgetState extends State<NotificationFormWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Padding(
-            padding:
-            const EdgeInsets.only(
-                left: 16.0, right: 16.0, top: 16.0, bottom: 8.0),
-             child: DropdownButton<String>(
-               value: dropdownValue,
-               onChanged: (String newValue) {
-                 setState(() {
-                   dropdownValue = newValue;
-                 });
-               },
-                items: <String>['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Daily'].map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
+          Row(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(
+                    left: 16.0, right: 16.0, top: 16.0, bottom: 8.0),
+                child: Text("Select Date:"),
               ),
-            ),
-          Padding(
-            padding:
-            const EdgeInsets.only(
-                left: 16.0, right: 16.0, top: 8.0, bottom: 8.0),
-            child: TextFormField(
-              decoration: InputDecoration(labelText: 'Time of notifcation (i.e. 1:00 pm)'),
-              validator: (value) {
-                if (value.isEmpty) {
-                  return 'Please enter a valid time';
-                }
-                return null;
-              },
-            ),
+              Padding(
+                  padding: const EdgeInsets.only(
+                      left: 16.0, right: 16.0, top: 16.0, bottom: 8.0),
+                  child: FlatButton(
+                    child: Text(
+                      formatter.format(dropdownValue),
+                      textAlign: TextAlign.left,
+                    ),
+                    onPressed: () {
+                      DatePicker.showDateTimePicker(context,
+                          showTitleActions: true, onConfirm: (date) {
+                            setState(() {
+                              dropdownValue = date;
+                            });
+                          });
+                    },
+                  )),
+            ],
           ),
           Padding(
-            padding:
-            const EdgeInsets.only(
+            padding: const EdgeInsets.only(
                 left: 16.0, right: 16.0, top: 8.0, bottom: 8.0),
             child: TextFormField(
               decoration: InputDecoration(labelText: 'Notifcation message'),
@@ -84,8 +79,7 @@ class _NotificationFormWidgetState extends State<NotificationFormWidget> {
             ),
           ),
           Padding(
-            padding:
-            const EdgeInsets.only(
+            padding: const EdgeInsets.only(
                 left: 16.0, right: 16.0, top: 8.0, bottom: 32.0),
             child: RaisedButton(
               onPressed: () {
