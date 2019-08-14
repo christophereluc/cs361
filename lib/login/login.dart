@@ -1,8 +1,11 @@
 import 'dart:async';
 
+import 'package:cs361/login/AuthenticateRequest.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:http/http.dart';
+import 'dart:convert';
 
 //Login Route class -- Defines page
 class LoginRoute extends StatelessWidget {
@@ -30,9 +33,15 @@ class LoginFormWidget extends StatefulWidget {
   _LoginFormWidgetState createState() => _LoginFormWidgetState();
 }
 
+class _FormData {
+  String username;
+  String password;
+}
+
 //Form state
 class _LoginFormWidgetState extends State<LoginFormWidget> {
   final _formKey = GlobalKey<FormState>();
+  final _formData = _FormData();
 
   @override
   Widget build(BuildContext context) {
@@ -42,8 +51,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Padding(
-            padding:
-            const EdgeInsets.only(
+            padding: const EdgeInsets.only(
                 left: 16.0, right: 16.0, top: 16.0, bottom: 8.0),
             child: TextFormField(
               decoration: InputDecoration(labelText: 'Username'),
@@ -53,11 +61,11 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                 }
                 return null;
               },
+              onSaved: (value) => _formData.username = value,
             ),
           ),
           Padding(
-            padding:
-            const EdgeInsets.only(
+            padding: const EdgeInsets.only(
                 left: 16.0, right: 16.0, top: 8.0, bottom: 8.0),
             child: TextFormField(
               decoration: InputDecoration(labelText: 'Password'),
@@ -67,32 +75,52 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                 }
                 return null;
               },
+
+              onSaved: (value) => _formData.password = value,
             ),
           ),
           Padding(
-            padding:
-            const EdgeInsets.only(
+            padding: const EdgeInsets.only(
                 left: 16.0, right: 16.0, top: 8.0, bottom: 8.0),
             child: RaisedButton(
-              onPressed: () {
-                // Validate will return true if the form is valid, or false if
-                // the form is invalid.
-                if (_formKey.currentState.validate()) {
-                  // Process data.
-                }
-              },
+              onPressed: _authenticate,
               child: Text('Submit'),
             ),
           ),
           Padding(
-              padding:
-              const EdgeInsets.only(
+              padding: const EdgeInsets.only(
                   left: 16.0, right: 16.0, top: 8.0, bottom: 16.0),
-              child: FingerprintAuth()
-          ),
+              child: FingerprintAuth()),
         ],
       ),
     );
+  }
+
+  Future<void> _authenticate() async {
+    // Validate will return true if the form is valid, or false if
+    // the form is invalid.
+    if (_formKey.currentState.validate()) {
+      _formKey.currentState.save();
+
+      bool authenticated = await _serverAuthenticator(
+          _formData.username, _formData.password);
+
+      setState(() {
+        if (authenticated) _showDialog(authenticated, context);
+      });
+    }
+  }
+}
+
+Future<bool> _serverAuthenticator(String username, String password) async {
+  final response = await post('http://flip1.engr.oregonstate.edu:5893',
+      body: AuthenticateRequest(username, password).toJson());
+  if (response != null) {
+    return AuthenticateResponse
+        .fromJson(json.decode(response.body))
+        .success;
+  } else {
+    return false;
   }
 }
 
@@ -104,36 +132,6 @@ class FingerprintAuth extends StatefulWidget {
 
 class _FingerprintAuthState extends State<FingerprintAuth> {
   final LocalAuthentication auth = LocalAuthentication();
-  bool _canCheckBiometrics;
-  List<BiometricType> _availableBiometrics;
-
-  Future<void> _checkBiometrics() async {
-    bool canCheckBiometrics;
-    try {
-      canCheckBiometrics = await auth.canCheckBiometrics;
-    } on PlatformException catch (e) {
-      print(e);
-    }
-    if (!mounted) return;
-
-    setState(() {
-      _canCheckBiometrics = canCheckBiometrics;
-    });
-  }
-
-  Future<void> _getAvailableBiometrics() async {
-    List<BiometricType> availableBiometrics;
-    try {
-      availableBiometrics = await auth.getAvailableBiometrics();
-    } on PlatformException catch (e) {
-      print(e);
-    }
-    if (!mounted) return;
-
-    setState(() {
-      _availableBiometrics = availableBiometrics;
-    });
-  }
 
   Future<void> _authenticate() async {
     bool authenticated = false;
@@ -145,31 +143,13 @@ class _FingerprintAuthState extends State<FingerprintAuth> {
     }
     if (!mounted) return;
 
-    setState(() {
-      if (authenticated) _showDialog();
-    });
-  }
+    if (authenticated) {
+      authenticated = await _serverAuthenticator("chris", "pass1234");
+    }
 
-  void _showDialog() {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            content: Text("Authentication Successful!"),
-            actions: <Widget>[
-              FlatButton(
-                child: Text("Close"),
-                onPressed: () {
-                  //Dismiss dialog
-                  Navigator.of(context).pop();
-                  //dismiss auth screen
-                  Navigator.of(context).pop();
-                },
-              )
-            ],
-          );
-        }
-    );
+    setState(() {
+      if (authenticated) _showDialog(authenticated, context);
+    });
   }
 
   @override
@@ -179,4 +159,27 @@ class _FingerprintAuthState extends State<FingerprintAuth> {
       onPressed: _authenticate,
     );
   }
+}
+
+void _showDialog(bool success, BuildContext context) {
+  showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Text(success
+              ? "Authentication Successful!"
+              : "Authentication Failed!"),
+          actions: <Widget>[
+            FlatButton(
+              child: Text("Close"),
+              onPressed: () {
+                //Dismiss dialog
+                Navigator.of(context).pop();
+                //dismiss auth screen
+                Navigator.of(context).pop();
+              },
+            )
+          ],
+        );
+      });
 }
