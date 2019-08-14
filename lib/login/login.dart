@@ -1,11 +1,12 @@
 import 'dart:async';
 
 import 'package:cs361/login/AuthenticateRequest.dart';
+import 'package:cs361/login/auth_completed_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:http/http.dart';
-import 'dart:convert';
+import 'fingerprint_auth.dart';
+import 'server_auth.dart';
 
 //Login Route class -- Defines page
 class LoginRoute extends StatelessWidget {
@@ -102,84 +103,12 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
 
-      bool authenticated = await _serverAuthenticator(
+      bool authenticated = await serverAuthenticator(
           _formData.username, _formData.password);
 
       setState(() {
-        if (authenticated) _showDialog(authenticated, context);
+        if (authenticated) showDialogCompleted(authenticated, context);
       });
     }
   }
-}
-
-Future<bool> _serverAuthenticator(String username, String password) async {
-  final response = await post('http://flip1.engr.oregonstate.edu:5893',
-      body: AuthenticateRequest(username, password).toJson());
-  if (response != null) {
-    return AuthenticateResponse
-        .fromJson(json.decode(response.body))
-        .success;
-  } else {
-    return false;
-  }
-}
-
-//Special widget for holding fingerprint auth state
-class FingerprintAuth extends StatefulWidget {
-  @override
-  _FingerprintAuthState createState() => _FingerprintAuthState();
-}
-
-class _FingerprintAuthState extends State<FingerprintAuth> {
-  final LocalAuthentication auth = LocalAuthentication();
-
-  Future<void> _authenticate() async {
-    bool authenticated = false;
-    try {
-      authenticated = await auth.authenticateWithBiometrics(
-          localizedReason: 'Scan your fingerprint to authenticate');
-    } on PlatformException catch (e) {
-      print(e);
-    }
-    if (!mounted) return;
-
-    if (authenticated) {
-      authenticated = await _serverAuthenticator("chris", "pass1234");
-    }
-
-    setState(() {
-      if (authenticated) _showDialog(authenticated, context);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return new RaisedButton(
-      child: const Text('Authenticate with Biometrics'),
-      onPressed: _authenticate,
-    );
-  }
-}
-
-void _showDialog(bool success, BuildContext context) {
-  showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: Text(success
-              ? "Authentication Successful!"
-              : "Authentication Failed!"),
-          actions: <Widget>[
-            FlatButton(
-              child: Text("Close"),
-              onPressed: () {
-                //Dismiss dialog
-                Navigator.of(context).pop();
-                //dismiss auth screen
-                Navigator.of(context).pop();
-              },
-            )
-          ],
-        );
-      });
 }
