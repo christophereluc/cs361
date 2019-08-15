@@ -1,10 +1,9 @@
 import 'dart:async';
 
-import 'package:cs361/login/AuthenticateRequest.dart';
 import 'package:cs361/login/auth_completed_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:local_auth/local_auth.dart';
+import 'package:progress_dialog/progress_dialog.dart';
+
 import 'fingerprint_auth.dart';
 import 'server_auth.dart';
 
@@ -103,11 +102,24 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
 
-      bool authenticated = await serverAuthenticator(
-          _formData.username, _formData.password);
+      ProgressDialog pr = ProgressDialog(context, ProgressDialogType.Normal);
+      pr.setMessage("Loading");
+      pr.show();
+
+      bool authenticated;
+      try {
+        authenticated =
+        await serverAuthenticator(_formData.username, _formData.password)
+            .timeout(const Duration(seconds: 10));
+      }
+      catch (e) {
+        print(e);
+        authenticated = false;
+      }
 
       setState(() {
-        if (authenticated) showDialogCompleted(authenticated, context);
+        pr.hide();
+        showDialogCompleted(authenticated, context);
       });
     }
   }
