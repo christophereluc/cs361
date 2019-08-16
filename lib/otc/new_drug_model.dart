@@ -2,10 +2,12 @@
 
 class NewDrugRequest {
   final String drugName;
+  final int user_id;
 
-  NewDrugRequest(this.drugName);
+  NewDrugRequest(this.drugName, this.user_id);
 
-  Map<String, dynamic> toJson() => {'drug_name': drugName};
+  Map<String, dynamic> toJson() =>
+      {'drug_name': drugName, 'user_id': user_id.toString()};
 }
 
 class NewDrugResponse {

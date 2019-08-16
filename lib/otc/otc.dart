@@ -1,8 +1,16 @@
+import 'package:cs361/otc/new_drug_model.dart';
 import 'package:flutter/material.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 
+import 'new_otc_api.dart';
+
+
 //Hub for hosting all app functionality (besides logging in)
 class OtcRoute extends StatelessWidget {
+  final int user_id;
+
+  OtcRoute(this.user_id);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -13,7 +21,7 @@ class OtcRoute extends StatelessWidget {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[NewOTCFormWidget()],
+          children: <Widget>[NewOTCFormWidget(user_id: user_id)],
         ),
       ),
     );
@@ -21,10 +29,12 @@ class OtcRoute extends StatelessWidget {
 }
 
 class NewOTCFormWidget extends StatefulWidget {
-  NewOTCFormWidget({Key key}) : super(key: key);
+  final int user_id;
+
+  NewOTCFormWidget({Key key, this.user_id}) : super(key: key);
 
   @override
-  _NewOTCFormWidgetState createState() => _NewOTCFormWidgetState();
+  _NewOTCFormWidgetState createState() => _NewOTCFormWidgetState(user_id);
 }
 
 class _FormData {
@@ -35,7 +45,9 @@ class _FormData {
 class _NewOTCFormWidgetState extends State<NewOTCFormWidget> {
   final _formKey = GlobalKey<FormState>();
   final _formData = _FormData();
+  final int user_id;
 
+  _NewOTCFormWidgetState(this.user_id);
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +95,9 @@ class _NewOTCFormWidgetState extends State<NewOTCFormWidget> {
       pr.show();
 
       //TODO Replace this with API call
-      await Future.delayed(new Duration(seconds: 5));
+      NewDrugResponse response = await submitOtcDrug(
+          NewDrugRequest(_formData.drugName, user_id)).timeout(
+          Duration(seconds: 10));
 
       setState(() {
         pr.hide();
@@ -92,7 +106,10 @@ class _NewOTCFormWidgetState extends State<NewOTCFormWidget> {
             barrierDismissible: false,
             builder: (BuildContext context) {
               return AlertDialog(
-                content: Text("Data submitted"),
+                content: Text(response != null && response.success ?
+                "Data submitted" :
+                "Failed submission"
+                ),
                 actions: <Widget>[
                   FlatButton(
                     child: Text("Close"),

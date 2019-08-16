@@ -36,7 +36,7 @@ class HubRoute extends StatelessWidget {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => OtcRoute()));
+                          builder: (context) => OtcRoute(this.user_id)));
                 },
                 child: Text('Launch OTC Drugs Screen')),
             RaisedButton(
