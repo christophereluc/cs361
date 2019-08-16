@@ -9,10 +9,12 @@ class AuthenticateRequest {
 
 class AuthenticateResponse {
   final bool success;
+  final int user_id;
 
-  AuthenticateResponse({this.success});
+  AuthenticateResponse({this.success, this.user_id});
 
   factory AuthenticateResponse.fromJson(Map<String, dynamic> json) {
-    return AuthenticateResponse(success: json['success']);
+    return AuthenticateResponse(
+        success: json['success'], user_id: json['user_id']);
   }
 }

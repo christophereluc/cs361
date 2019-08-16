@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cs361/login/auth_completed_dialog.dart';
+import 'package:cs361/login/authenticate_models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
@@ -18,39 +19,41 @@ class _FingerprintAuthState extends State<FingerprintAuth> {
   final LocalAuthentication auth = LocalAuthentication();
 
   Future<void> _authenticate() async {
-    bool authenticated = false;
+    bool fingerprintAuth = false;
     try {
-      authenticated = await auth.authenticateWithBiometrics(
+      fingerprintAuth = await auth.authenticateWithBiometrics(
           localizedReason: 'Scan your fingerprint to authenticate');
     } on PlatformException catch (e) {
       print(e);
     }
     if (!mounted) return;
 
-    if (authenticated) {
+    AuthenticateResponse authenticateResponse = null;
+
+    if (fingerprintAuth) {
       //This is simulated logging in with credentials stored in the device's keychain,
       //so it's not pulling from the username/pw fields
-      authenticated = await serverAuthenticator("chris", "pass1234")
+      authenticateResponse = await serverAuthenticator("chris", "pass1234")
           .timeout(const Duration(seconds: 10));
     }
 
-    if (authenticated) {
+    if (authenticateResponse != null) {
       ProgressDialog pr = ProgressDialog(context, ProgressDialogType.Normal);
       pr.setMessage("Loading");
       pr.show();
 
       try {
-        authenticated = await serverAuthenticator("chris", "pass1234")
+        authenticateResponse = await serverAuthenticator("chris", "pass1234")
             .timeout(const Duration(seconds: 10));
       } catch (e) {
         print(e);
-        authenticated = false;
+        authenticateResponse = null;
       }
       pr.hide();
     }
 
     setState(() {
-      showDialogCompleted(authenticated, context);
+      showDialogCompleted(authenticateResponse, context);
     });
   }
 

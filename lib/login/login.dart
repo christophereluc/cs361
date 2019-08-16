@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cs361/login/auth_completed_dialog.dart';
+import 'package:cs361/login/authenticate_models.dart';
 import 'package:flutter/material.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 
@@ -106,7 +107,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
       pr.setMessage("Loading");
       pr.show();
 
-      bool authenticated;
+      AuthenticateResponse authenticated;
       try {
         authenticated =
         await serverAuthenticator(_formData.username, _formData.password)
@@ -114,7 +115,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
       }
       catch (e) {
         print(e);
-        authenticated = false;
+        authenticated = null;
       }
 
       setState(() {

@@ -5,6 +5,11 @@ import 'package:flutter/material.dart';
 
 //Hub for hosting all app functionality (besides logging in)
 class HubRoute extends StatelessWidget {
+
+  final int user_id;
+
+  HubRoute(this.user_id);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
