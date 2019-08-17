@@ -31,13 +31,6 @@ class _FingerprintAuthState extends State<FingerprintAuth> {
     AuthenticateResponse authenticateResponse = null;
 
     if (fingerprintAuth) {
-      //This is simulated logging in with credentials stored in the device's keychain,
-      //so it's not pulling from the username/pw fields
-      authenticateResponse = await serverAuthenticator("chris", "pass1234")
-          .timeout(const Duration(seconds: 10));
-    }
-
-    if (authenticateResponse != null) {
       ProgressDialog pr = ProgressDialog(context, ProgressDialogType.Normal);
       pr.setMessage("Loading");
       pr.show();
